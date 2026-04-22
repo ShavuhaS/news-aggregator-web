@@ -17,7 +17,7 @@ export async function apiFetch<T>(
 
   let response = await fetch(url, defaultOptions);
 
-  if (response.status === 401 && endpoint !== '/auth/refresh' && endpoint !== '/auth/login') {
+  if (response.status === 401 && endpoint !== '/auth/refresh' && endpoint !== '/auth/login' && endpoint !== '/auth/logout') {
     try {
       const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',

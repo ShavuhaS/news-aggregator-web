@@ -5,6 +5,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { apiFetch } from '@/lib/api';
 import { Header } from '@/components/Header';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { LoginPage } from '@/pages/auth/LoginPage';
+import { RegisterPage } from '@/pages/auth/RegisterPage';
 
 const queryClient = new QueryClient();
 
@@ -14,10 +16,7 @@ function App() {
   const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
-    const handleUnauthorized = () => {
-      logout();
-    };
-
+    const handleUnauthorized = () => logout();
     window.addEventListener('auth:unauthorized', handleUnauthorized);
 
     const initAuth = async () => {
@@ -32,50 +31,24 @@ function App() {
     };
 
     initAuth();
-
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, [setUser, setLoading, logout]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-background text-foreground flex flex-col">
           <Header />
           
-          <main className="container mx-auto p-4 md:p-8">
+          <main className="flex-1 container mx-auto p-4 md:p-8">
             <Routes>
-              {/* Публічні маршрути */}
               <Route path="/" element={<NewsFeedPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
-              {/* Маршрути для авторизованих користувачів */}
-              <Route 
-                path="/for-you" 
-                element={
-                  <ProtectedRoute>
-                    <ForYouPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <ProfileSettingsPage />
-                  </ProtectedRoute>
-                } 
-              />
-
-              {/* Маршрути тільки для адмінів */}
-              <Route 
-                path="/admin" 
-                element={
-                  <ProtectedRoute requiredRole="ADMIN">
-                    <AdminDashboardPage />
-                  </ProtectedRoute>
-                } 
-              />
+              <Route path="/for-you" element={<ProtectedRoute><ForYouPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="ADMIN"><AdminDashboardPage /></ProtectedRoute>} />
             </Routes>
           </main>
         </div>
@@ -84,12 +57,10 @@ function App() {
   );
 }
 
-// Тимчасові компоненти-заглушки (placeholders)
-const NewsFeedPage = () => <div>Головна стрічка новин (Публічна)</div>;
-const LoginPage = () => <div>Сторінка входу</div>;
-const RegisterPage = () => <div>Сторінка реєстрації</div>;
-const ForYouPage = () => <div>Персоналізовані новини (Тільки авторизовані)</div>;
-const ProfileSettingsPage = () => <div>Налаштування профілю (Тільки авторизовані)</div>;
-const AdminDashboardPage = () => <div>Панель адміністратора (Тільки ADMIN)</div>;
+// Заглушки для інших сторінок
+const NewsFeedPage = () => <div className="text-center py-20 text-muted-foreground">Тут буде головна стрічка новин.</div>;
+const ForYouPage = () => <div className="text-center py-20 text-muted-foreground">Тут будуть ваші персоналізовані новини.</div>;
+const ProfileSettingsPage = () => <div className="text-center py-20 text-muted-foreground">Налаштування профілю.</div>;
+const AdminDashboardPage = () => <div className="text-center py-20 text-muted-foreground">Панель адміністратора.</div>;
 
 export default App;
