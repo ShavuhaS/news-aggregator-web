@@ -46,6 +46,16 @@ export async function apiFetch<T>(
     throw new Error(errorData.message || response.statusText);
   }
 
-  if (response.status === 204) return {} as T;
-  return response.json();
+  const contentType = response.headers.get('content-type');
+  if (response.status === 204 || !contentType || !contentType.includes('application/json')) {
+    return {} as T;
+  }
+
+  try {
+    const text = await response.text();
+    return text ? JSON.parse(text) : ({} as T);
+  } catch (err) {
+    console.error('Error parsing JSON:', err);
+    return {} as T;
+  }
 }

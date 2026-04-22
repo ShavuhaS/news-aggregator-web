@@ -19,6 +19,7 @@ export interface User {
   username: string;
   role: 'USER' | 'ADMIN';
   googleId?: string | null;
+  hasPassword: boolean;
   preferredCategories: Category[];
   preferredLocations: Location[];
 }
