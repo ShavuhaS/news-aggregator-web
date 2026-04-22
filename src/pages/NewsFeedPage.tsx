@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { NewsCard } from '@/components/news/NewsCard';
@@ -7,61 +6,32 @@ import { Pagination } from '@/components/shared/Pagination';
 import { NewsEmptyState } from '@/components/news/NewsEmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaginatedResponse } from '@/types/api';
-import { NewsArticle, ListNewsQuery, NewsSortField, SortOrder } from '@/types/news';
+import { NewsArticle } from '@/types/news';
+import { useNewsFilters } from '@/hooks/useNewsFilters';
 
 export function NewsFeedPage() {
-  const [filters, setFilters] = useState<ListNewsQuery>({
-    page: 1,
-    pageSize: 12,
-    search: '',
-    minSentiment: -1,
-    maxSentiment: 1,
-    sortBy: NewsSortField.PUBLISHED_AT,
-    sortOrder: SortOrder.DESC,
-  });
-
-  const [searchInput, setSearchInput] = useState('');
-
-  // Дебаунс для пошуку
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters(prev => ({ ...prev, search: searchInput, page: 1 }));
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+  const {
+    filters,
+    setFilters,
+    searchInput,
+    setSearchInput,
+    handlePageChange,
+    handlePageSizeChange,
+    resetAll,
+  } = useNewsFilters();
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['news', filters],
     queryFn: () => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') params.append(key, value.toString());
+        if (value !== undefined && value !== '' && value !== null) {
+          params.append(key, value.toString());
+        }
       });
       return apiFetch<PaginatedResponse<NewsArticle>>(`/news?${params.toString()}`);
     },
   });
-
-  const handlePageChange = (newPage: number) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handlePageSizeChange = (newSize: number) => {
-    setFilters(prev => ({ ...prev, pageSize: newSize, page: 1 }));
-  };
-
-  const resetAll = () => {
-    setFilters({
-      page: 1,
-      pageSize: 12,
-      search: '',
-      minSentiment: -1,
-      maxSentiment: 1,
-      sortBy: NewsSortField.PUBLISHED_AT,
-      sortOrder: SortOrder.DESC,
-    });
-    setSearchInput('');
-  };
 
   return (
     <div className="space-y-8">
