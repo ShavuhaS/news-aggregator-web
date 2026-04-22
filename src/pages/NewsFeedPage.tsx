@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { NewsCard } from '@/components/news/NewsCard';
 import { NewsFilters } from '@/components/news/NewsFilters';
+import { NewsAppliedFilters } from '@/components/news/NewsAppliedFilters';
 import { Pagination } from '@/components/shared/Pagination';
 import { NewsEmptyState } from '@/components/news/NewsEmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaginatedResponse } from '@/types/api';
-import { NewsArticle } from '@/types/news';
+import { NewsArticle, ListNewsQuery } from '@/types/news';
 import { useNewsFilters } from '@/hooks/useNewsFilters';
 
 export function NewsFeedPage() {
@@ -33,6 +34,16 @@ export function NewsFeedPage() {
     },
   });
 
+  const handleRemoveFilter = (key: string) => {
+    if (key === 'dateRange') {
+      setFilters(prev => ({ ...prev, from: undefined, to: undefined, page: 1 }));
+    } else if (key === 'sentiment') {
+      setFilters(prev => ({ ...prev, minSentiment: -1, maxSentiment: 1, page: 1 }));
+    } else {
+      setFilters(prev => ({ ...prev, [key]: undefined, page: 1 }));
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -40,13 +51,21 @@ export function NewsFeedPage() {
         <p className="text-muted-foreground text-lg font-medium">Останні події, проаналізовані для вас</p>
       </div>
 
-      <NewsFilters 
-        filters={filters}
-        onFiltersChange={setFilters}
-        searchInput={searchInput}
-        onSearchInputChange={setSearchInput}
-        isFetching={isFetching}
-      />
+      <div className="space-y-4">
+        <NewsFilters 
+          filters={filters}
+          onFiltersChange={setFilters}
+          searchInput={searchInput}
+          onSearchInputChange={setSearchInput}
+          isFetching={isFetching}
+        />
+
+        <NewsAppliedFilters 
+          filters={filters} 
+          onRemove={handleRemoveFilter}
+          onClearAll={resetAll}
+        />
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
