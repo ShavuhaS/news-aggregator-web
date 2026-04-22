@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { format } from 'date-fns';
-import { ListNewsQuery } from '@/types/news';
+import { ListNewsQuery, NewsSortField, SortOrder, SORT_OPTIONS } from '@/types/news';
 import { ActiveFilters, type ActiveFilterItem } from '@/components/shared/ActiveFilters';
 
 interface NewsAppliedFiltersProps {
   filters: ListNewsQuery;
-  onRemove: (key: keyof ListNewsQuery | 'dateRange' | 'sentiment') => void;
+  onRemove: (key: keyof ListNewsQuery | 'dateRange' | 'sentiment' | 'sort') => void;
   onClearAll: () => void;
 }
 
@@ -24,6 +24,20 @@ export function NewsAppliedFilters({ filters, onRemove, onClearAll }: NewsApplie
   });
 
   const activeItems: ActiveFilterItem[] = [];
+
+  const isDefaultSort = filters.sortBy === NewsSortField.PUBLISHED_AT && filters.sortOrder === SortOrder.DESC;
+  if (!isDefaultSort) {
+    const currentSort = SORT_OPTIONS.find(
+      (opt) => opt.field === filters.sortBy && opt.order === filters.sortOrder
+    );
+    if (currentSort) {
+      activeItems.push({
+        key: 'sort',
+        label: 'Порядок',
+        displayValue: currentSort.label,
+      });
+    }
+  }
 
   if (filters.categoryId && category) {
     activeItems.push({ 

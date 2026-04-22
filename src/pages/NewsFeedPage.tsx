@@ -7,7 +7,7 @@ import { Pagination } from '@/components/shared/Pagination';
 import { NewsEmptyState } from '@/components/news/NewsEmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaginatedResponse } from '@/types/api';
-import { NewsArticle, ListNewsQuery } from '@/types/news';
+import { NewsArticle, NewsSortField, SortOrder } from '@/types/news';
 import { useNewsFilters } from '@/hooks/useNewsFilters';
 
 export function NewsFeedPage() {
@@ -39,6 +39,8 @@ export function NewsFeedPage() {
       setFilters(prev => ({ ...prev, from: undefined, to: undefined, page: 1 }));
     } else if (key === 'sentiment') {
       setFilters(prev => ({ ...prev, minSentiment: -1, maxSentiment: 1, page: 1 }));
+    } else if (key === 'sort') {
+      setFilters(prev => ({ ...prev, sortBy: NewsSortField.PUBLISHED_AT, sortOrder: SortOrder.DESC, page: 1 }));
     } else {
       setFilters(prev => ({ ...prev, [key]: undefined, page: 1 }));
     }

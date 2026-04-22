@@ -55,3 +55,12 @@ export interface ListNewsQuery {
   sortBy?: NewsSortField;
   sortOrder?: SortOrder;
 }
+
+export const SORT_OPTIONS = [
+  { label: 'Нові', field: NewsSortField.PUBLISHED_AT, order: SortOrder.DESC },
+  { label: 'Старі', field: NewsSortField.PUBLISHED_AT, order: SortOrder.ASC },
+  { label: 'Позитивні', field: NewsSortField.SENTIMENT, order: SortOrder.DESC },
+  { label: 'Негативні', field: NewsSortField.SENTIMENT, order: SortOrder.ASC },
+  { label: 'А-Я', field: NewsSortField.TITLE, order: SortOrder.ASC },
+  { label: 'Я-А', field: NewsSortField.TITLE, order: SortOrder.DESC },
+] as const;

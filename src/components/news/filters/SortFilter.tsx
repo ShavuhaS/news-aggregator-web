@@ -1,15 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpAz } from 'lucide-react';
-import { NewsSortField, SortOrder } from '@/types/news';
-
-const SORT_OPTIONS = [
-  { label: 'А-Я', field: NewsSortField.TITLE, order: SortOrder.ASC },
-  { label: 'Я-А', field: NewsSortField.TITLE, order: SortOrder.DESC },
-  { label: 'Нові', field: NewsSortField.PUBLISHED_AT, order: SortOrder.DESC },
-  { label: 'Старі', field: NewsSortField.PUBLISHED_AT, order: SortOrder.ASC },
-  { label: 'Позитивні', field: NewsSortField.SENTIMENT, order: SortOrder.DESC },
-  { label: 'Негативні', field: NewsSortField.SENTIMENT, order: SortOrder.ASC },
-];
+import { NewsSortField, SortOrder, SORT_OPTIONS } from '@/types/news';
 
 interface SortFilterProps {
   sortBy?: NewsSortField;
