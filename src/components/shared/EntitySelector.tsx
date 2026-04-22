@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { X, Plus, Loader2, Search } from 'lucide-react';
+import { X, Loader2, Search } from 'lucide-react';
 import { PaginatedResponse } from '@/types/api';
+import { EntityList } from './EntityList';
 
 interface EntitySelectorProps {
   title: string;
@@ -123,48 +124,16 @@ export function EntitySelector({
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {otherItems.map((item) => (
-              <Button
-                key={item.id}
-                variant="outline"
-                size="sm"
-                className="h-8"
-                onClick={() => toggleMutation.mutate({ id: item.id, action: 'add' })}
-                disabled={toggleMutation.isPending}
-              >
-                {toggleMutation.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Plus className="mr-1 h-3 w-3" />
-                )}
-                {item[labelKey]}
-              </Button>
-            ))}
-
-            {hasNextPage && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs font-bold uppercase tracking-wider text-muted-foreground"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-              >
-                {isFetchingNextPage ? (
-                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                ) : (
-                  <Plus className="h-3 w-3 mr-1" />
-                )}
-                Завантажити ще
-              </Button>
-            )}
-
-            {search && !isLoading && otherItems.length === 0 && (
-              <p className="text-xs text-muted-foreground py-2">
-                Нічого не знайдено за запитом "{search}"
-              </p>
-            )}
-          </div>
+          <EntityList
+            items={otherItems}
+            labelKey={labelKey}
+            onAdd={(id) => toggleMutation.mutate({ id, action: 'add' })}
+            isPending={toggleMutation.isPending}
+            hasNextPage={hasNextPage || false}
+            onLoadMore={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            emptyMessage={`Нічого не знайдено за запитом "${search}"`}
+          />
         </div>
       </CardContent>
     </Card>
