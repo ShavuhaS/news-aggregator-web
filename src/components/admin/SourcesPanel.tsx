@@ -17,6 +17,7 @@ import { SourceStatusFilter } from './sources/filters/SourceStatusFilter';
 import { SourceTypeFilter } from './sources/filters/SourceTypeFilter';
 import { SourceSortFilter } from './sources/filters/SourceSortFilter';
 import { SearchFilterBar } from '@/components/shared/SearchFilterBar';
+import { SourceEditDialog } from './sources/edit/SourceEditDialog';
 
 export function SourcesPanel() {
   const queryClient = useQueryClient();
@@ -24,6 +25,10 @@ export function SourcesPanel() {
   const [pageSize, setPageSize] = useState(12);
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Стан діалогу
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   
   const [filters, setFilters] = useState<Omit<ListSourcesQuery, 'page' | 'pageSize' | 'search'>>({
     sortBy: ParserSourceSortField.CREATED_AT,
@@ -50,6 +55,7 @@ export function SourcesPanel() {
     },
   });
 
+  // Мутації
   const triggerParseMutation = useMutation({
     mutationFn: (id: string) => apiFetch(`/parser/sources/${id}/parse`, { method: 'POST' }),
     onSuccess: () => toast.success('Запит на парсинг надіслано'),
@@ -77,6 +83,17 @@ export function SourcesPanel() {
     },
     onError: (err: Error) => toast.error(err.message),
   });
+
+  // Обробники
+  const handleAdd = () => {
+    setSelectedSourceId(null);
+    setEditDialogOpen(true);
+  };
+
+  const handleEdit = (source: ParserSource) => {
+    setSelectedSourceId(source.id);
+    setEditDialogOpen(true);
+  };
 
   const handleToggleStatus = (source: ParserSource) => {
     const action = source.active ? 'вимкнути' : 'активувати';
@@ -121,7 +138,7 @@ export function SourcesPanel() {
     setPage(1);
   };
 
-  const hasFilters = search !== '' || filters.active !== undefined || (!!filters.types && filters.types.length > 0);
+  const hasFilters = Boolean(search !== '' || filters.active !== undefined || (filters.types && filters.types.length > 0));
 
   return (
     <div className="space-y-6">
@@ -133,7 +150,10 @@ export function SourcesPanel() {
           </h2>
           <p className="text-muted-foreground text-sm">Керування сайтами-джерелами та конфігурацією парсерів</p>
         </div>
-        <Button className="h-10 gap-2 font-bold uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20 cursor-pointer transition-all hover:scale-105 active:scale-95">
+        <Button 
+          onClick={handleAdd}
+          className="h-10 gap-2 font-bold uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20 cursor-pointer transition-all hover:scale-105 active:scale-95"
+        >
           <Plus className="h-4 w-4" />
           Додати джерело
         </Button>
@@ -235,7 +255,7 @@ export function SourcesPanel() {
                           deleteMutation.mutate(s.id);
                         }
                       }}
-                      onEdit={(s) => console.log('Edit source', s)}
+                      onEdit={handleEdit}
                       isTriggerPending={triggerParseMutation.isPending}
                       isStatusPending={statusMutation.isPending}
                     />
@@ -257,6 +277,12 @@ export function SourcesPanel() {
           onPageSizeChange={setPageSize}
         />
       )}
+
+      <SourceEditDialog 
+        sourceId={selectedSourceId}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 }
