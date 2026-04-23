@@ -1,34 +1,51 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { PaginatedResponse } from '@/types/api';
-import { ParserSource } from '@/types/parser';
+import { ParserSource, ParserSourceSortField, ParserSortDir, ListSourcesQuery } from '@/types/parser';
 import { Pagination } from '@/components/shared/Pagination';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Database, Plus } from 'lucide-react';
+import { Database, Plus, FilterX } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SourceRow } from './sources/SourceRow';
+import { FilterPanel } from '@/components/shared/FilterPanel';
+import { ActiveFilters, ActiveFilterItem } from '@/components/shared/ActiveFilters';
+import { SourceStatusFilter } from './sources/filters/SourceStatusFilter';
+import { SourceTypeFilter } from './sources/filters/SourceTypeFilter';
+import { SourceSortFilter } from './sources/filters/SourceSortFilter';
+import { SearchFilterBar } from '@/components/shared/SearchFilterBar';
 
 export function SourcesPanel() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [search, setSearch] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  const [filters, setFilters] = useState<Omit<ListSourcesQuery, 'page' | 'pageSize' | 'search'>>({
+    sortBy: ParserSourceSortField.CREATED_AT,
+    sortDir: ParserSortDir.DESC,
+  });
   
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin-sources', page, pageSize, debouncedSearch],
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['admin-sources', page, pageSize, debouncedSearch, filters],
     queryFn: () => {
       const params = new URLSearchParams({
         page: page.toString(),
         pageSize: pageSize.toString(),
         search: debouncedSearch,
       });
+
+      if (filters.active !== undefined) params.append('active', filters.active.toString());
+      if (filters.sortBy) params.append('sortBy', filters.sortBy);
+      if (filters.sortDir) params.append('sortDir', filters.sortDir);
+      filters.types?.forEach(t => params.append('types', t));
+      
       return apiFetch<PaginatedResponse<ParserSource>>(`/parser/sources?${params.toString()}`);
     },
   });
@@ -68,11 +85,43 @@ export function SourcesPanel() {
     }
   };
 
-  const handleDelete = (source: ParserSource) => {
-    if (confirm(`Ви впевнені, що хочете видалити джерело "${source.name}"?`)) {
-      deleteMutation.mutate(source.id);
-    }
+  const handleReset = () => {
+    setSearch('');
+    setFilters({
+      sortBy: ParserSourceSortField.CREATED_AT,
+      sortDir: ParserSortDir.DESC,
+    });
+    setPage(1);
   };
+
+  const activeFilterItems = useMemo(() => {
+    const items: ActiveFilterItem[] = [];
+    if (search) items.push({ key: 'search', label: 'Пошук', displayValue: search });
+    if (filters.active !== undefined) {
+      items.push({ 
+        key: 'active', 
+        label: 'Статус', 
+        displayValue: filters.active ? 'Активні' : 'Неактивні' 
+      });
+    }
+    if (filters.types && filters.types.length > 0) {
+      items.push({ 
+        key: 'types', 
+        label: 'Типи', 
+        displayValue: filters.types.join(', ') 
+      });
+    }
+    return items;
+  }, [search, filters]);
+
+  const removeFilter = (key: string) => {
+    if (key === 'search') setSearch('');
+    if (key === 'active') setFilters({ ...filters, active: undefined });
+    if (key === 'types') setFilters({ ...filters, types: [] });
+    setPage(1);
+  };
+
+  const hasFilters = search !== '' || filters.active !== undefined || (!!filters.types && filters.types.length > 0);
 
   return (
     <div className="space-y-6">
@@ -84,54 +133,94 @@ export function SourcesPanel() {
           </h2>
           <p className="text-muted-foreground text-sm">Керування сайтами-джерелами та конфігурацією парсерів</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Пошук джерел..."
-              className="pl-9 h-10 rounded-xl"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
+        <Button className="h-10 gap-2 font-bold uppercase text-[10px] tracking-widest px-6 shadow-lg shadow-primary/20 cursor-pointer transition-all hover:scale-105 active:scale-95">
+          <Plus className="h-4 w-4" />
+          Додати джерело
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        <SearchFilterBar 
+          searchInput={search}
+          onSearchInputChange={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
+          showFilters={showFilters}
+          onToggleFilters={() => setShowFilters(!showFilters)}
+          isFetching={isFetching}
+        />
+
+        {showFilters && (
+          <FilterPanel onReset={handleReset} hasFilters={hasFilters}>
+            <SourceStatusFilter 
+              value={filters.active} 
+              onChange={(val) => {
+                setFilters({ ...filters, active: val });
+                setPage(1);
+              }} 
+            />
+
+            <SourceTypeFilter 
+              value={filters.types || []} 
+              onChange={(val) => {
+                setFilters({ ...filters, types: val });
+                setPage(1);
+              }} 
+            />
+
+            <SourceSortFilter 
+              sortBy={filters.sortBy}
+              sortDir={filters.sortDir}
+              onChange={(field, dir) => {
+                setFilters({ ...filters, sortBy: field, sortDir: dir });
                 setPage(1);
               }}
             />
-          </div>
-          <Button className="h-10 gap-2 font-bold uppercase text-[10px] tracking-widest px-4 shadow-lg shadow-primary/20 cursor-pointer">
-            <Plus className="h-4 w-4" />
-            Додати
-          </Button>
-        </div>
+          </FilterPanel>
+        )}
+
+        <ActiveFilters 
+          items={activeFilterItems} 
+          onRemove={removeFilter} 
+          onClearAll={handleReset} 
+        />
       </div>
 
       <Card className="border-muted/60 shadow-sm overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
+            <table className="w-full text-sm border-collapse text-left">
               <thead>
                 <tr className="bg-muted/30 border-b border-muted/50">
-                  <th className="px-6 py-4 text-left font-black uppercase text-[10px] tracking-widest text-muted-foreground">Джерело</th>
-                  <th className="px-6 py-4 text-center font-black uppercase text-[10px] tracking-widest text-muted-foreground">Тип</th>
-                  <th className="px-6 py-4 text-center font-black uppercase text-[10px] tracking-widest text-muted-foreground">Статус</th>
-                  <th className="px-6 py-4 text-left font-black uppercase text-[10px] tracking-widest text-muted-foreground">Парсинг</th>
-                  <th className="px-6 py-4 text-right font-black uppercase text-[10px] tracking-widest text-muted-foreground">Дії</th>
+                  <th className="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-muted-foreground w-1/3">Джерело</th>
+                  <th className="px-6 py-4 text-center font-black uppercase text-[10px] tracking-widest text-muted-foreground w-32">Тип</th>
+                  <th className="px-6 py-4 text-center font-black uppercase text-[10px] tracking-widest text-muted-foreground w-32">Статус</th>
+                  <th className="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-muted-foreground">Моніторинг</th>
+                  <th className="px-6 py-4 text-right font-black uppercase text-[10px] tracking-widest text-muted-foreground w-40">Дії</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-muted/40">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i}>
-                      <td className="px-6 py-4"><Skeleton className="h-10 w-48" /></td>
-                      <td className="px-6 py-4"><Skeleton className="mx-auto h-6 w-16" /></td>
-                      <td className="px-6 py-4"><Skeleton className="mx-auto h-6 w-20" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-10 w-32" /></td>
-                      <td className="px-6 py-4"><Skeleton className="ml-auto h-8 w-24" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-10 w-full rounded-lg" /></td>
+                      <td className="px-6 py-4"><Skeleton className="mx-auto h-6 w-16 rounded-md" /></td>
+                      <td className="px-6 py-4"><Skeleton className="mx-auto h-6 w-20 rounded-md" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-10 w-32 rounded-lg" /></td>
+                      <td className="px-6 py-4"><Skeleton className="ml-auto h-8 w-24 rounded-lg" /></td>
                     </tr>
                   ))
                 ) : data?.data.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-24 text-center text-muted-foreground italic font-medium">
-                      Джерел не знайдено
+                    <td colSpan={5} className="px-6 py-24 text-center">
+                      <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                        <FilterX className="h-10 w-10 opacity-20" />
+                        <p className="font-medium italic text-lg">Нічого не знайдено за такими фільтрами</p>
+                        <Button variant="link" onClick={handleReset} className="text-primary font-bold uppercase text-[10px] tracking-widest">
+                          Очистити все
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -141,7 +230,11 @@ export function SourcesPanel() {
                       source={source}
                       onTriggerParse={(id) => triggerParseMutation.mutate(id)}
                       onToggleStatus={handleToggleStatus}
-                      onDelete={handleDelete}
+                      onDelete={(s) => {
+                        if (confirm(`Ви впевнені, що хочете видалити джерело "${s.name}"?`)) {
+                          deleteMutation.mutate(s.id);
+                        }
+                      }}
                       onEdit={(s) => console.log('Edit source', s)}
                       isTriggerPending={triggerParseMutation.isPending}
                       isStatusPending={statusMutation.isPending}

@@ -57,6 +57,7 @@ export function NewsFeedPage() {
         <NewsFilters 
           filters={filters}
           onFiltersChange={setFilters}
+          onReset={resetAll}
           searchInput={searchInput}
           onSearchInputChange={setSearchInput}
           isFetching={isFetching}
@@ -98,7 +99,7 @@ export function NewsFeedPage() {
                 pageSize={filters.pageSize!}
                 totalPages={data?.totalPages || 0} 
                 totalCount={data?.totalCount || 0}
-                onPageChange={handlePageChange} 
+                onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
               />
             </div>
