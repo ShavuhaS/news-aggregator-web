@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Database, AlertCircle, MessageSquareWarning, ShieldCheck } from 'lucide-react';
+import { ParserErrorsPanel } from '@/components/admin/ParserErrorsPanel';
 
 export function AdminPage() {
   return (
@@ -39,15 +40,7 @@ export function AdminPage() {
         </TabsContent>
 
         <TabsContent value="errors" className="animate-in fade-in slide-in-from-bottom-2 duration-300 outline-none">
-          <Card className="border-muted/60 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-destructive">Лог помилок</CardTitle>
-              <CardDescription>Останні технічні проблеми при зборі новин</CardDescription>
-            </CardHeader>
-            <CardContent className="h-60 flex items-center justify-center border-t border-dashed mt-4 bg-muted/5">
-              <p className="text-muted-foreground font-medium italic">Тут буде таблиця помилок парсингу в реальному часі</p>
-            </CardContent>
-          </Card>
+          <ParserErrorsPanel />
         </TabsContent>
 
         <TabsContent value="complaints" className="animate-in fade-in slide-in-from-bottom-2 duration-300 outline-none">

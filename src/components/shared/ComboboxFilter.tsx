@@ -31,6 +31,7 @@ interface ComboboxFilterProps {
   queryKey: string;
   searchEndpoint: string;
   labelKey: string;
+  displayValue?: string;
 }
 
 export function ComboboxFilter({
@@ -45,6 +46,7 @@ export function ComboboxFilter({
   queryKey,
   searchEndpoint,
   labelKey,
+  displayValue,
 }: ComboboxFilterProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -59,7 +61,7 @@ export function ComboboxFilter({
 
   return (
     <div className="space-y-2.5">
-      <label className="h-5 text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 shrink-0">
+      <label className="h-5 text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 shrink-0 px-1">
         <Icon className="h-4 w-4 text-primary" /> {label}
       </label>
       <div className="h-10 w-full relative">
@@ -71,16 +73,17 @@ export function ComboboxFilter({
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className="w-full justify-between h-full font-medium overflow-hidden border-muted-foreground/20 hover:border-primary/50 transition-colors"
+                className="w-full justify-between h-full font-medium overflow-hidden border-muted-foreground/20 hover:border-primary/50 transition-colors rounded-xl"
               >
                 <span className="truncate text-left">
-                  {value ? selectedItem?.[labelKey] || placeholder : allLabel}
+                  {value ? (displayValue || selectedItem?.[labelKey] || placeholder) : allLabel}
                 </span>
+                <Check className="ml-2 h-4 w-4 shrink-0 opacity-0" />
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             }
           />
-          <PopoverContent className="w-[250px] p-0 shadow-xl border-muted" align="start">
+          <PopoverContent className="w-[250px] p-0 shadow-xl border-muted rounded-2xl overflow-hidden" align="start">
             <Command shouldFilter={false}>
               <CommandInput 
                 placeholder={searchPlaceholder} 
