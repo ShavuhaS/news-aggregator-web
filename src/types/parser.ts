@@ -1,3 +1,5 @@
+export type ParserSourceType = 'RSS' | 'JSON' | 'HTML';
+
 export interface ParserParsingError {
   id: string;
   sourceId: string;
@@ -10,9 +12,14 @@ export interface ParserSource {
   id: string;
   name: string;
   url: string;
+  type: ParserSourceType;
   active: boolean;
+  schedule: string | null;
   lastParsedAt: string | null;
+  nextRunAt: string | null;
   logoUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ListParsingErrorsQuery {

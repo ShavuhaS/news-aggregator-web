@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Database, AlertCircle, MessageSquareWarning, ShieldCheck } from 'lucide-react';
 import { ParserErrorsPanel } from '@/components/admin/ParserErrorsPanel';
 import { NewsComplaintsPanel } from '@/components/admin/NewsComplaintsPanel';
+import { SourcesPanel } from '@/components/admin/SourcesPanel';
 
 export function AdminPage() {
   return (
@@ -29,15 +29,7 @@ export function AdminPage() {
         </TabsList>
 
         <TabsContent value="sources" className="animate-in fade-in slide-in-from-bottom-2 duration-300 outline-none">
-          <Card className="border-muted/60 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">Управління джерелами</CardTitle>
-              <CardDescription>Список активних та призупинених парсерів новин</CardDescription>
-            </CardHeader>
-            <CardContent className="h-60 flex items-center justify-center border-t border-dashed mt-4 bg-muted/5">
-              <p className="text-muted-foreground font-medium italic">Тут буде список джерел з можливістю додавання та редагування</p>
-            </CardContent>
-          </Card>
+          <SourcesPanel />
         </TabsContent>
 
         <TabsContent value="errors" className="animate-in fade-in slide-in-from-bottom-2 duration-300 outline-none">
