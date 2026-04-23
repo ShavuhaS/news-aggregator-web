@@ -26,7 +26,7 @@ export function SourceHttpFields({ headers, onChange }: SourceHttpFieldsProps) {
     if (oldKey !== newKey) {
       delete newHeaders[oldKey];
     }
-    newHeaders[newKey] = value || ''; // Гарантуємо порожній рядок замість undefined
+    newHeaders[newKey] = value || '';
     onChange(newHeaders);
   };
 
@@ -65,7 +65,7 @@ export function SourceHttpFields({ headers, onChange }: SourceHttpFieldsProps) {
               />
               <Input
                 placeholder="Значення"
-                value={value || ''} // Гарантуємо порожній рядок
+                value={value || ''}
                 onChange={(e) => updateHeader(key, key, e.target.value)}
                 className="flex-1 font-mono text-xs"
               />

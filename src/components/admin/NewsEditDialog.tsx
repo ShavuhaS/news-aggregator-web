@@ -1,13 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Tag, MapPin, AlertTriangle, Settings } from 'lucide-react';
 import { NewsArticleDetails, Complaint } from '@/types/news';
@@ -16,6 +9,7 @@ import { EntitySelector } from '@/components/shared/EntitySelector';
 import { NewsComplaintsAdmin } from './NewsComplaintsAdmin';
 import { Badge } from '@/components/ui/badge';
 import { PaginatedResponse } from '@/types/api';
+import { FormDialog } from '@/components/shared/FormDialog';
 
 interface NewsEditDialogProps {
   newsId: string;
@@ -49,72 +43,68 @@ export function NewsEditDialog({ newsId, open, onOpenChange }: NewsEditDialogPro
     onError: (err: Error) => toast.error(err.message),
   });
 
-  if (isArticleLoading && open) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="flex items-center justify-center h-60">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   const complaintsCount = complaintsData?.totalCount || 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto border-muted shadow-2xl p-0 gap-0">
-        <div className="p-6 pb-0">
-          <DialogHeader>
-            <div className="flex justify-between items-start pr-10">
-              <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                <Settings className="h-6 w-6 text-primary" />
-                Керування новиною
-              </DialogTitle>
-              {complaintsCount > 0 && (
-                <Badge variant="destructive" className="h-6 px-2 gap-1.5 rounded-full animate-pulse border-2 border-background shadow-md">
-                  <AlertTriangle className="h-3 w-3" />
-                  <span className="text-[10px] font-black">{complaintsCount}</span>
-                </Badge>
-              )}
-            </div>
-            <DialogDescription className="line-clamp-1 font-medium text-foreground pt-1 italic">
-              {article?.title}
-            </DialogDescription>
-          </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Settings}
+      title="Керування новиною"
+      description={article?.title}
+      isPending={false} 
+      isDirty={false}   
+      onSubmit={() => onOpenChange(false)}
+      submitLabel="Закрити"
+      cancelLabel="Скасувати"
+      maxWidth="sm:max-w-4xl"
+    >
+      {isArticleLoading ? (
+        <div className="flex-1 flex items-center justify-center p-20">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-primary opacity-50" />
+            <p className="text-muted-foreground font-medium animate-pulse">Отримання даних...</p>
+          </div>
         </div>
+      ) : (
+        <Tabs defaultValue="content" className="flex-1 flex flex-col overflow-hidden">
+          <div className="px-8 border-b border-muted bg-muted/5">
+            <TabsList className="h-14 w-full justify-start gap-8 bg-transparent p-0">
+              <TabsTrigger value="content" className="relative h-14 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 font-bold uppercase text-[11px] tracking-[0.1em] gap-2.5 cursor-pointer transition-all">
+                <Tag className="h-4 w-4 text-muted-foreground group-data-[state=active]:text-primary" /> Категорія
+              </TabsTrigger>
+              <TabsTrigger value="locations" className="relative h-14 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 font-bold uppercase text-[11px] tracking-[0.1em] gap-2.5 cursor-pointer transition-all">
+                <MapPin className="h-4 w-4 text-muted-foreground group-data-[state=active]:text-primary" /> Локації
+              </TabsTrigger>
+              <TabsTrigger value="complaints" className="relative h-14 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 font-bold uppercase text-[11px] tracking-[0.1em] gap-2.5 cursor-pointer transition-all">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-muted-foreground group-data-[state=active]:text-destructive" /> 
+                  Скарги
+                  {complaintsCount > 0 && (
+                    <Badge variant="destructive" className="h-5 px-1.5 py-0 min-w-5 justify-center font-black text-[9px] rounded-full border-2 border-background">
+                      {complaintsCount}
+                    </Badge>
+                  )}
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <Tabs defaultValue="content" className="w-full mt-6">
-          <TabsList className="flex h-12 w-full bg-muted/30 p-1 rounded-none border-y border-muted">
-            <TabsTrigger value="content" className="flex-1 gap-2 font-bold uppercase text-[10px] tracking-widest cursor-pointer transition-all data-[state=active]:bg-background">
-              <Tag className="h-3.5 w-3.5 text-primary" /> Категорія
-            </TabsTrigger>
-            <TabsTrigger value="locations" className="flex-1 gap-2 font-bold uppercase text-[10px] tracking-widest cursor-pointer transition-all data-[state=active]:bg-background border-x border-muted/50">
-              <MapPin className="h-3.5 w-3.5 text-primary" /> Локації
-            </TabsTrigger>
-            <TabsTrigger value="complaints" className="flex-1 gap-2 font-bold uppercase text-[10px] tracking-widest cursor-pointer transition-all data-[state=active]:bg-background relative">
-              <AlertTriangle className="h-3.5 w-3.5 text-destructive" /> Скарги
-              {complaintsCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 bg-destructive text-destructive-foreground text-[9px] font-black rounded-full leading-none">
-                  {complaintsCount}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="p-6">
-            <TabsContent value="content" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 outline-none">
-              <div className="bg-muted/10 p-8 rounded-3xl border border-dashed border-muted-foreground/20">
-                {article && (
-                  <CategoryFilter 
-                    value={article.categoryId} 
-                    onChange={(id) => id && updateCategoryMutation.mutate(id)} 
-                  />
-                )}
+          <div className="flex-1 overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-muted">
+            <TabsContent value="content" className="m-0 space-y-8 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-muted/10 p-10 rounded-[2.5rem] border border-dashed border-muted-foreground/20 flex flex-col items-center">
+                <div className="w-full max-w-sm">
+                  {article && (
+                    <CategoryFilter 
+                      value={article.categoryId} 
+                      onChange={(id) => id && updateCategoryMutation.mutate(id)} 
+                    />
+                  )}
+                </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="locations" className="mt-0 animate-in fade-in slide-in-from-bottom-2 outline-none">
+            <TabsContent value="locations" className="m-0 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
               {article && (
                 <EntitySelector
                   title="Географічна прив'язка"
@@ -134,7 +124,7 @@ export function NewsEditDialog({ newsId, open, onOpenChange }: NewsEditDialogPro
               )}
             </TabsContent>
 
-            <TabsContent value="complaints" className="mt-0 animate-in fade-in slide-in-from-bottom-2 outline-none">
+            <TabsContent value="complaints" className="m-0 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
               <NewsComplaintsAdmin 
                 newsId={newsId} 
                 onNewsDeleted={() => onOpenChange(false)} 
@@ -143,7 +133,7 @@ export function NewsEditDialog({ newsId, open, onOpenChange }: NewsEditDialogPro
             </TabsContent>
           </div>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+      )}
+    </FormDialog>
   );
 }
