@@ -36,7 +36,7 @@ export function AuthStatus() {
         variant="outline" 
         size="sm" 
         onClick={() => logout()}
-        className="h-8 px-3"
+        className="h-8 px-3 cursor-pointer"
       >
         Вийти
       </Button>

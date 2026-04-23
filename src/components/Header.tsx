@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 const NAV_ITEMS = [
   { label: 'Новини', href: '/' },
   { label: 'Для вас', href: '/for-you', protected: true },
+  { label: 'Адмін', href: '/admin', protected: true, roles: ['ADMIN'] },
 ];
 
 export function Header() {
@@ -27,7 +28,12 @@ export function Header() {
           
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
-              if (item.protected && !user) return null;
+              if (
+                item.protected &&
+                (!user
+                  ||
+                (item.roles && !item.roles.includes(user.role))
+              )) return null;
               
               return (
                 <Link
@@ -44,20 +50,6 @@ export function Header() {
                 </Link>
               );
             })}
-            
-            {user?.role === 'ADMIN' && (
-              <Link
-                to="/admin"
-                className={cn(
-                  "px-4 py-2 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground",
-                  location.pathname.startsWith('/admin') 
-                    ? "text-foreground bg-accent" 
-                    : "text-muted-foreground"
-                )}
-              >
-                Адмін
-              </Link>
-            )}
           </nav>
         </div>
         

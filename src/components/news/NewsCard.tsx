@@ -2,19 +2,23 @@ import { useState } from 'react';
 import { NewsArticle } from '@/types/news';
 import { Card } from '@/components/ui/card';
 import { getSentimentDetails } from '@/lib/sentiment';
+import { useAuthStore } from '@/store/useAuthStore';
 import { NewsCardImage } from './card-parts/NewsCardImage';
 import { NewsCardHeader } from './card-parts/NewsCardHeader';
 import { NewsCardContent } from './card-parts/NewsCardContent';
 import { NewsCardFooter } from './card-parts/NewsCardFooter';
 import { ComplaintDialog } from './ComplaintDialog';
+import { NewsEditDialog } from '@/components/admin/NewsEditDialog';
 
 interface NewsCardProps {
   article: NewsArticle;
 }
 
 export function NewsCard({ article }: NewsCardProps) {
+  const { user } = useAuthStore();
   const { color } = getSentimentDetails(article.sentimentScore);
-  const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false);
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <>
@@ -45,17 +49,25 @@ export function NewsCard({ article }: NewsCardProps) {
           <NewsCardFooter 
             sentimentScore={article.sentimentScore} 
             link={article.link} 
-            onComplaintClick={() => setIsComplaintDialogOpen(true)}
+            onComplaintClick={() => setIsActionDialogOpen(true)}
           />
         </div>
       </Card>
 
-      <ComplaintDialog
-        newsId={article.id}
-        newsTitle={article.title}
-        open={isComplaintDialogOpen}
-        onOpenChange={setIsComplaintDialogOpen}
-      />
+      {isAdmin ? (
+        <NewsEditDialog
+          newsId={article.id}
+          open={isActionDialogOpen}
+          onOpenChange={setIsActionDialogOpen}
+        />
+      ) : (
+        <ComplaintDialog
+          newsId={article.id}
+          newsTitle={article.title}
+          open={isActionDialogOpen}
+          onOpenChange={setIsActionDialogOpen}
+        />
+      )}
     </>
   );
 }

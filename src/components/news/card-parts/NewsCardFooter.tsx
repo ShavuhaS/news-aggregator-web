@@ -1,7 +1,8 @@
-import { ExternalLink, MessageSquareWarning } from 'lucide-react';
+import { ExternalLink, MessageSquareWarning, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getSentimentDetails } from '@/lib/sentiment';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface NewsCardFooterProps {
   sentimentScore: number | null;
@@ -10,8 +11,10 @@ interface NewsCardFooterProps {
 }
 
 export function NewsCardFooter({ sentimentScore, link, onComplaintClick }: NewsCardFooterProps) {
+  const { user } = useAuthStore();
   const { color, icon: EmotionIcon, label } = getSentimentDetails(sentimentScore);
   const percentage = Math.round(Math.abs(sentimentScore ?? 0) * 100);
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <div className="px-4 pb-4 pt-3 flex justify-between items-center gap-2 border-t bg-muted/5 mt-auto">
@@ -37,11 +40,15 @@ export function NewsCardFooter({ sentimentScore, link, onComplaintClick }: NewsC
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+          className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
           onClick={onComplaintClick}
-          title="Поскаржитись на новину"
+          title={isAdmin ? "Редагувати новину" : "Поскаржитись на новину"}
         >
-          <MessageSquareWarning className="h-4 w-4" />
+          {isAdmin ? (
+            <Settings className="h-4 w-4" />
+          ) : (
+            <MessageSquareWarning className="h-4 w-4" />
+          )}
         </Button>
         <Button variant="outline" size="sm" className="h-9 px-4 gap-2 text-xs font-bold shadow-sm" asChild>
           <a href={link} target="_blank" rel="noopener noreferrer">
