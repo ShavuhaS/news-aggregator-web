@@ -61,7 +61,11 @@ export function EntitySelector({
   });
 
   const preferredIds = new Set(preferredItems.map((i) => i.id));
-  const allFoundItems = searchData?.pages.flatMap((page) => page.data) || [];
+  
+  const allFoundItems = searchData?.pages 
+    ? searchData.pages.flatMap((page) => page.data || []) 
+    : [];
+    
   const otherItems = allFoundItems.filter((item) => !preferredIds.has(item.id));
 
   const toggleMutation = useMutation({
@@ -128,10 +132,10 @@ export function EntitySelector({
             labelKey={labelKey}
             onAdd={(id) => toggleMutation.mutate({ id, action: 'add' })}
             isPending={toggleMutation.isPending}
-            hasNextPage={hasNextPage || false}
+            hasNextPage={!!hasNextPage}
             onLoadMore={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
-            emptyMessage={`Нічого не знайдено за запитом "${search}"`}
+            emptyMessage={search ? `Нічого не знайдено за запитом "${search}"` : "Почніть пошук..."}
           />
         </div>
       </CardContent>

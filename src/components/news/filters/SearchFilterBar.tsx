@@ -34,7 +34,7 @@ export function SearchFilterBar({
       <Button
         variant={showFilters ? 'secondary' : 'outline'}
         onClick={onToggleFilters}
-        className="h-12 px-6 gap-2 font-bold uppercase tracking-wider shadow-sm shrink-0 w-full sm:w-auto"
+        className="h-12 px-6 gap-2 font-bold uppercase tracking-wider shadow-sm shrink-0 w-full sm:w-auto cursor-pointer"
       >
         <SlidersHorizontal className="h-4 w-4" />
         Фільтри

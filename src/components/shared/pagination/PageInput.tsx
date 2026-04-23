@@ -42,7 +42,7 @@ export function PageInput({ page, totalPages, onPageChange }: PageInputProps) {
       <Button
         variant="outline"
         size="sm"
-        className="font-bold uppercase text-[10px] tracking-widest h-9 px-4"
+        className="font-bold uppercase text-[10px] tracking-widest h-9 px-4 cursor-pointer"
         onClick={() => onPageChange(page - 1)}
         disabled={page === 1}
       >
@@ -65,7 +65,7 @@ export function PageInput({ page, totalPages, onPageChange }: PageInputProps) {
       <Button
         variant="outline"
         size="sm"
-        className="font-bold uppercase text-[10px] tracking-widest h-9 px-4"
+        className="font-bold uppercase text-[10px] tracking-widest h-9 px-4 cursor-pointer"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
       >

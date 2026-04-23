@@ -33,7 +33,7 @@ export function NewsCardHeader({ title, categoryName, publishedAt, link }: NewsC
               rel="noopener noreferrer"
               className="block hover:text-primary transition-colors"
             >
-              <h3 className="font-bold leading-tight text-lg line-clamp-2">{title}</h3>
+              <h3 className="font-bold leading-tight text-lg line-clamp-3">{title}</h3>
             </a>
           }
         />

@@ -22,7 +22,7 @@ export function PageSizeSelector({ pageSize, totalCount, onPageSizeChange }: Pag
         value={pageSize.toString()}
         onValueChange={(v) => onPageSizeChange(Number(v))}
       >
-        <SelectTrigger className="h-8 w-[75px] bg-background">
+        <SelectTrigger className="h-8 w-[75px] bg-background cursor-pointer">
           <SelectValue placeholder={pageSize.toString()} />
         </SelectTrigger>
         <SelectContent>

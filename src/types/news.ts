@@ -23,6 +23,22 @@ export enum SortOrder {
   DESC = 'desc',
 }
 
+export enum ComplaintStatus {
+  PENDING = 'PENDING',
+  RESOLVED = 'RESOLVED',
+  REJECTED = 'REJECTED',
+}
+
+export interface Complaint {
+  id: string;
+  newsId: string | null;
+  userId: string;
+  reason: string;
+  status: ComplaintStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewsArticle {
   id: string;
   title: string;

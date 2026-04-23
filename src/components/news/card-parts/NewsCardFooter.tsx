@@ -6,9 +6,10 @@ import { getSentimentDetails } from '@/lib/sentiment';
 interface NewsCardFooterProps {
   sentimentScore: number | null;
   link: string;
+  onComplaintClick: () => void;
 }
 
-export function NewsCardFooter({ sentimentScore, link }: NewsCardFooterProps) {
+export function NewsCardFooter({ sentimentScore, link, onComplaintClick }: NewsCardFooterProps) {
   const { color, icon: EmotionIcon, label } = getSentimentDetails(sentimentScore);
   const percentage = Math.round(Math.abs(sentimentScore ?? 0) * 100);
 
@@ -17,7 +18,7 @@ export function NewsCardFooter({ sentimentScore, link }: NewsCardFooterProps) {
       <Tooltip>
         <TooltipTrigger 
           render={
-            <div className="flex items-center gap-2 bg-background/80 px-2.5 py-1.5 rounded-full border border-muted/50 shadow-sm cursor-help hover:bg-background transition-colors">
+            <div className="flex items-center gap-2 bg-background/80 px-2.5 py-1.5 rounded-full border border-muted/50 shadow-sm cursor-help hover:bg-background transition-colors text-foreground">
               <EmotionIcon className="h-4 w-4 transition-colors" style={{ color }} />
               <span className="text-xs font-black tabular-nums" style={{ color }}>
                 {percentage}%
@@ -37,6 +38,8 @@ export function NewsCardFooter({ sentimentScore, link }: NewsCardFooterProps) {
           variant="ghost"
           size="icon"
           className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+          onClick={onComplaintClick}
+          title="Поскаржитись на новину"
         >
           <MessageSquareWarning className="h-4 w-4" />
         </Button>

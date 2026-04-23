@@ -27,6 +27,7 @@ export function DateRangeFilter({ from, to, onChange }: DateRangeFilterProps) {
       </label>
       <Popover>
         <PopoverTrigger 
+        className="cursor-pointer"
           render={
             <Button
               variant="outline"

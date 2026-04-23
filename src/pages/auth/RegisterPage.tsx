@@ -89,7 +89,7 @@ export function RegisterPage() {
             register={register}
             errors={errors}
           >
-            <Button className="w-full font-bold h-11 text-base transition-all" type="submit" disabled={isLoading}>
+            <Button className="w-full font-bold h-11 text-base transition-all cursor-pointer" type="submit" disabled={isLoading}>
               {isLoading ? 'Створення...' : 'Зареєструватися'}
             </Button>
           </Form>

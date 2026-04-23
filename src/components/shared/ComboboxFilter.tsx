@@ -65,6 +65,7 @@ export function ComboboxFilter({
       <div className="h-10 w-full relative">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger 
+            className="cursor-pointer"
             render={
               <Button
                 variant="outline"

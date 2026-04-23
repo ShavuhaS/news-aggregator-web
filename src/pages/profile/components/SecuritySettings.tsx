@@ -73,7 +73,7 @@ export function SecuritySettings() {
             register={form.register}
             errors={form.formState.errors}
           >
-            <Button disabled={mutation.isPending}>
+            <Button disabled={mutation.isPending} className="cursor-pointer">
               {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Оновити пароль
             </Button>

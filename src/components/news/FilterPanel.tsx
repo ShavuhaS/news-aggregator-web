@@ -53,7 +53,7 @@ export function FilterPanel({ filters, onFiltersChange, onReset }: FilterPanelPr
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted font-bold uppercase text-[10px] tracking-widest h-8"
+            className="text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-dotted font-bold uppercase text-[10px] tracking-widest h-8 cursor-pointer"
             onClick={onReset}
           >
             Скинути все
