@@ -1,14 +1,10 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from '@/lib/api';
-import { PaginatedResponse } from '@/types/api';
 import { ParserSource, ParserSourceSortField, ParserSortDir, ListSourcesQuery } from '@/types/parser';
 import { Pagination } from '@/components/shared/Pagination';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Database, Plus, FilterX } from 'lucide-react';
-import { toast } from 'sonner';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SourceRow } from './sources/SourceRow';
 import { FilterPanel } from '@/components/shared/FilterPanel';
@@ -18,13 +14,15 @@ import { SourceTypeFilter } from './sources/filters/SourceTypeFilter';
 import { SourceSortFilter } from './sources/filters/SourceSortFilter';
 import { SearchFilterBar } from '@/components/shared/SearchFilterBar';
 import { SourceEditDialog } from './sources/edit/SourceEditDialog';
+import { useSources } from '@/hooks/api/useSources';
+import { useSourceMutations } from '@/hooks/api/useSourceMutations';
 
 export function SourcesPanel() {
-  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   
@@ -35,51 +33,15 @@ export function SourcesPanel() {
   
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['admin-sources', page, pageSize, debouncedSearch, filters],
-    queryFn: () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-        search: debouncedSearch,
-      });
-
-      if (filters.active !== undefined) params.append('active', filters.active.toString());
-      if (filters.sortBy) params.append('sortBy', filters.sortBy);
-      if (filters.sortDir) params.append('sortDir', filters.sortDir);
-      filters.types?.forEach(t => params.append('types', t));
-      
-      return apiFetch<PaginatedResponse<ParserSource>>(`/parser/sources?${params.toString()}`);
-    },
-  });
-  const triggerParseMutation = useMutation({
-    mutationFn: (id: string) => apiFetch(`/parser/sources/${id}/parse`, { method: 'POST' }),
-    onSuccess: () => toast.success('Запит на парсинг надіслано'),
-    onError: (err: Error) => toast.error(err.message),
+  const { data, isLoading, isFetching } = useSources({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    ...filters
   });
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, active }: { id: string; active: boolean }) => 
-      apiFetch(`/parser/sources/${id}/status`, { 
-        method: 'PUT', 
-        body: JSON.stringify({ active }) 
-      }),
-    onSuccess: () => {
-      toast.success('Статус джерела оновлено');
-      queryClient.invalidateQueries({ queryKey: ['admin-sources'] });
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
+  const { triggerParse, toggleStatus, deleteSource } = useSourceMutations();
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiFetch(`/parser/sources/${id}`, { method: 'DELETE' }),
-    onSuccess: () => {
-      toast.success('Джерело видалено');
-      queryClient.invalidateQueries({ queryKey: ['admin-sources'] });
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
-  
   const handleAdd = () => {
     setSelectedSourceId(null);
     setEditDialogOpen(true);
@@ -93,7 +55,7 @@ export function SourcesPanel() {
   const handleToggleStatus = (source: ParserSource) => {
     const action = source.active ? 'вимкнути' : 'активувати';
     if (confirm(`Ви впевнені, що хочете ${action} джерело "${source.name}"?`)) {
-      statusMutation.mutate({ id: source.id, active: !source.active });
+      toggleStatus.mutate({ id: source.id, active: !source.active });
     }
   };
 
@@ -243,16 +205,16 @@ export function SourcesPanel() {
                     <SourceRow 
                       key={source.id} 
                       source={source}
-                      onTriggerParse={(id) => triggerParseMutation.mutate(id)}
+                      onTriggerParse={(id) => triggerParse.mutate(id)}
                       onToggleStatus={handleToggleStatus}
                       onDelete={(s) => {
                         if (confirm(`Ви впевнені, що хочете видалити джерело "${s.name}"?`)) {
-                          deleteMutation.mutate(s.id);
+                          deleteSource.mutate(s.id);
                         }
                       }}
                       onEdit={handleEdit}
-                      isTriggerPending={triggerParseMutation.isPending}
-                      isStatusPending={statusMutation.isPending}
+                      isTriggerPending={triggerParse.isPending}
+                      isStatusPending={toggleStatus.isPending}
                     />
                   ))
                 )}

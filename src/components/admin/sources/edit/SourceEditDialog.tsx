@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller, SubmitHandler, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from '@/lib/api';
-import { ParserSource } from '@/types/parser';
 import { createSourceSchema, CreateSourceValues } from '@/lib/validations/parser';
 import { 
   Dialog, 
@@ -34,6 +31,8 @@ import { HTMLMappingFields } from './HTMLMappingFields';
 import { JSONMappingFields } from './JSONMappingFields';
 import { SourceDateFormatsField } from './SourceDateFormatsField';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSourceDetail } from '@/hooks/api/useSources';
+import { useSourceMutations } from '@/hooks/api/useSourceMutations';
 
 interface SourceEditDialogProps {
   sourceId: string | null;
@@ -42,14 +41,11 @@ interface SourceEditDialogProps {
 }
 
 export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDialogProps) {
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('basic');
 
-  const { data: fullSource, isLoading: isSourceLoading } = useQuery({
-    queryKey: ['admin-source-detail', sourceId],
-    queryFn: () => apiFetch<ParserSource>(`/parser/sources/${sourceId}`),
-    enabled: !!sourceId && open,
-  });
+  const { data: fullSource, isLoading: isSourceLoading } = useSourceDetail(sourceId, open);
+  
+  const { createSource, updateSource } = useSourceMutations();
 
   const form = useForm<CreateSourceValues>({
     resolver: zodResolver(createSourceSchema),
@@ -107,63 +103,15 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
     }
   }, [fullSource, sourceId, reset, open]);
 
-  const mutation = useMutation({
-    mutationFn: async (values: CreateSourceValues) => {
-      const payload: any = { ...values };
-      if (!payload.logoUrl || payload.logoUrl.trim() === '') {
-        delete payload.logoUrl;
-      }
-
-      if (!sourceId) {
-        return apiFetch('/parser/sources', { 
-          method: 'POST', 
-          body: JSON.stringify(payload) 
-        });
-      }
-
-      const requests = [];
-      
-      const basicInfo: any = {
-        name: values.name,
-        url: values.url,
-        schedule: values.schedule,
-      };
-      
-      if (values.logoUrl && values.logoUrl.trim() !== '') {
-        basicInfo.logoUrl = values.logoUrl;
-      } else {
-        basicInfo.logoUrl = null; // Очищуємо лого при оновленні, якщо воно порожнє
-      }
-
-      requests.push(apiFetch(`/parser/sources/${sourceId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(basicInfo)
-      }));
-
-      if (values.active !== fullSource?.active) {
-        requests.push(apiFetch(`/parser/sources/${sourceId}/status`, {
-          method: 'PUT',
-          body: JSON.stringify({ active: values.active })
-        }));
-      }
-
-      requests.push(apiFetch(`/parser/sources/${sourceId}/config`, {
-        method: 'PUT',
-        body: JSON.stringify({ configuration: values.configuration })
-      }));
-
-      return Promise.all(requests);
-    },
-    onSuccess: () => {
-      toast.success(sourceId ? 'Джерело оновлено' : 'Джерело створено');
-      queryClient.invalidateQueries({ queryKey: ['admin-sources'] });
-      onOpenChange(false);
-    },
-    onError: (err: Error) => toast.error(err.message)
-  });
-
   const onSubmit: SubmitHandler<CreateSourceValues> = (values) => {
-    mutation.mutate(values);
+    if (sourceId) {
+      updateSource.mutate(
+        { id: sourceId, values, oldActive: fullSource?.active },
+        { onSuccess: () => onOpenChange(false) }
+      );
+    } else {
+      createSource.mutate(values, { onSuccess: () => onOpenChange(false) });
+    }
   };
 
   const onInvalid = (errors: any) => {
@@ -172,6 +120,7 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
   };
 
   const mappingError = errors.configuration?.mapping as FieldError | undefined;
+  const isPending = createSource.isPending || updateSource.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -397,10 +346,10 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
                   )}
                   <Button 
                     type="submit" 
-                    disabled={mutation.isPending || !isDirty} 
+                    disabled={isPending || !isDirty} 
                     className="h-12 px-10 rounded-xl font-black uppercase text-[11px] tracking-[0.1em] gap-3 shadow-xl shadow-primary/20 cursor-pointer transition-all hover:scale-[1.02] active:scale-95 disabled:grayscale"
                   >
-                    {mutation.isPending ? (
+                    {isPending ? (
                       <Loader2 className="h-4.5 w-4.5 animate-spin" />
                     ) : (
                       <Save className="h-4.5 w-4.5" />
