@@ -47,7 +47,7 @@ export function NewsCardHeader({ title, categoryName, publishedAt, link, variant
               className="block hover:text-primary transition-colors"
             >
               <h3 className={cn(
-                "font-bold leading-tight text-lg line-clamp-2",
+                "font-bold leading-tight text-lg line-clamp-3",
                 isCompact && "text-base"
               )}>
                 {title}

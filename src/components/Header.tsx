@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { label: 'Для вас', href: '/for-you', protected: true },
-  { label: 'Пошук', href: '/' },
+  { label: 'Пошук', href: '/search' },
+  { label: 'Поблизу', href: '/nearby' },
   { label: 'Адмін', href: '/admin', protected: true, roles: ['ADMIN'] },
 ];
 
@@ -13,11 +14,13 @@ export function Header() {
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
 
+  const logoHref = user ? "/for-you" : "/search";
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-90">
+          <Link to={logoHref} className="flex items-center gap-2 transition-opacity hover:opacity-90">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xl">N</span>
             </div>

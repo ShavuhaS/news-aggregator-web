@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Header } from '@/components/Header';
@@ -9,14 +9,15 @@ import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { NewsFeedPage } from '@/pages/NewsFeedPage';
 import { ForYouPage } from '@/pages/news/ForYouPage';
+import { NearbyNewsPage } from '@/pages/news/NearbyNewsPage';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient();
 
 function App() {
-  const fetchProfile = useAuthStore((state) => state.fetchProfile);
-  const logout = useAuthStore((state) => state.logout);
+  const { user, fetchProfile, logout, isLoading } = useAuthStore();
 
   useEffect(() => {
     const handleUnauthorized = () => logout();
@@ -24,6 +25,14 @@ function App() {
     fetchProfile();
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, [fetchProfile, logout]);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -34,7 +43,10 @@ function App() {
             
             <main className="flex-1 container mx-auto p-4 md:p-8">
               <Routes>
-                <Route path="/" element={<NewsFeedPage />} />
+                <Route path="/" element={<Navigate to={user ? "/for-you" : "/search"} replace />} />
+                
+                <Route path="/search" element={<NewsFeedPage />} />
+                <Route path="/nearby" element={<NearbyNewsPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
 

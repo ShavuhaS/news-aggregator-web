@@ -7,8 +7,7 @@ import { ForYouSideNav, type SideNavItem } from './components/ForYouSideNav';
 import { NewsSectionGroup } from './components/NewsSectionGroup';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
-const KYIV_COORDS = { lat: 50.4501, lon: 30.5234 };
+import { DEFAULT_NEARBY_DISTANCE, KYIV_COORDS } from '@/constants/news';
 
 export function ForYouPage() {
   const { user } = useAuthStore();
@@ -58,9 +57,9 @@ export function ForYouPage() {
               icon={Navigation}
               queryParam="nearby"
               queryValue="true"
-              href="/" 
+              href="/nearby" 
               isNearby={true}
-              nearbyParams={{ ...coords, dist: 20 }}
+              nearbyParams={{ ...coords, dist: DEFAULT_NEARBY_DISTANCE }}
             />
 
             {user.preferredCategories.length > 0 && (
