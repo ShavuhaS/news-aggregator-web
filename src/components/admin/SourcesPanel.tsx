@@ -25,8 +25,8 @@ const COLUMNS: DataTableColumn[] = [
 
 const STATUS_OPTIONS: ToggleFilterOption[] = [
   { value: 'all', label: 'Всі' },
-  { value: 'active', label: 'On', icon: Power, activeClass: 'data-[state=on]:bg-emerald-700' },
-  { value: 'inactive', label: 'Off', icon: PowerOff, activeClass: 'data-[state=on]:bg-amber-700' },
+  { value: 'active', label: 'On', icon: Power, activeClass: 'data-pressed:bg-emerald-700' },
+  { value: 'inactive', label: 'Off', icon: PowerOff, activeClass: 'data-pressed:bg-amber-700' },
 ];
 
 const TYPE_OPTIONS: ToggleFilterOption[] = [
@@ -37,8 +37,8 @@ const TYPE_OPTIONS: ToggleFilterOption[] = [
 
 const SORT_OPTIONS: ToggleFilterOption[] = [
   { value: ParserSourceSortField.NAME, label: 'Назва' },
-  { value: ParserSourceSortField.LAST_PARSED_AT, label: 'Був запуск' },
-  { value: ParserSourceSortField.NEXT_RUN_AT, label: 'План запуску' },
+  { value: ParserSourceSortField.LAST_PARSED_AT, label: 'Запуск' },
+  { value: ParserSourceSortField.NEXT_RUN_AT, label: 'План' },
   { value: ParserSourceSortField.CREATED_AT, label: 'Додано' },
 ];
 

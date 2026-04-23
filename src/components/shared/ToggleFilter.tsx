@@ -39,8 +39,8 @@ export function ToggleFilter({
   };
 
   return (
-    <div className={cn("space-y-2.5", className)}>
-      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2">
+    <div className={cn("space-y-2.5 min-w-0", className)}>
+      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2 whitespace-nowrap">
         {LabelIcon && <LabelIcon className="h-3 w-3 text-primary" />}
         {label}
       </label>
@@ -48,15 +48,15 @@ export function ToggleFilter({
         multiple={multiple}
         value={safeValue}
         onValueChange={handleValueChange}
-        className="justify-start gap-1 bg-muted/50 p-1 rounded-xl w-fit border border-muted"
+        className="flex flex-wrap justify-start gap-1 bg-muted/50 p-1 rounded-xl w-fit border border-muted max-w-full"
       >
         {options.map((option) => (
           <ToggleGroupItem
             key={option.value}
             value={option.value}
             className={cn(
-              "h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all gap-1.5",
-              "data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:bg-primary/90",
+              "h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all gap-1.5 whitespace-nowrap border border-transparent",
+              "data-pressed:text-white data-pressed:shadow-md data-pressed:bg-slate-800/90 dark:data-pressed:bg-slate-100 dark:data-pressed:text-slate-900",
               option.activeClass
             )}
           >

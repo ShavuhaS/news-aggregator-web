@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Database, AlertCircle } from 'lucide-react';
+import { Database, AlertCircle, RotateCcw } from 'lucide-react';
 import { Pagination } from '@/components/shared/Pagination';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { ComboboxFilter } from '@/components/shared/ComboboxFilter';
 import { DataTable, DataTableColumn } from '@/components/shared/DataTable';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { ParserErrorRow } from './ParserErrorRow';
 import { useParserErrors } from '@/hooks/api/useParserErrors';
 import { useSourceDetail } from '@/hooks/api/useSources';
@@ -25,6 +27,11 @@ export function ParserErrorsPanel() {
   });
 
   const { data: selectedSource } = useSourceDetail(sourceId || null);
+
+  const handleReset = () => {
+    setSourceId(undefined);
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -64,18 +71,17 @@ export function ParserErrorsPanel() {
         isLoading={isLoading}
         skeletonCount={pageSize}
         emptyState={
-          <div className="flex flex-col items-center gap-3 text-muted-foreground py-12">
-            <AlertCircle className="h-10 w-10 opacity-20" />
-            <p className="font-medium italic text-lg text-center">Помилок не знайдено</p>
-            {sourceId && (
-              <button 
-                onClick={() => setSourceId(undefined)}
-                className="text-primary font-bold uppercase text-[10px] tracking-widest hover:underline cursor-pointer"
-              >
-                Скинути фільтр
-              </button>
-            )}
-          </div>
+          <EmptyState
+            variant="ghost"
+            icon={AlertCircle}
+            title="Помилок не знайдено"
+            description={sourceId ? "Для обраного джерела технічних проблем не зафіксовано" : "Журнал порожній"}
+            action={sourceId ? {
+              label: "Скинути фільтр",
+              icon: RotateCcw,
+              onClick: handleReset
+            } : undefined}
+          />
         }
         renderRow={(error) => (
           <ParserErrorRow key={error.id} error={error} />
