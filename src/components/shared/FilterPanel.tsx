@@ -13,7 +13,7 @@ export function FilterPanel({ children, onReset, hasFilters }: FilterPanelProps)
   return (
     <Card className="bg-muted/30 border-muted p-6 animate-in fade-in slide-in-from-top-2 duration-300 shadow-inner">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-6">
           {children}
         </div>
         

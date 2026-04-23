@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ParserSource, ParserSourceSortField, ParserSortDir, ListSourcesQuery, ParserSourceType } from '@/types/parser';
 import { Pagination } from '@/components/shared/Pagination';
 import { Button } from '@/components/ui/button';
-import { Database, Plus, FilterX, Power, PowerOff, ListOrdered, SortAsc, SortDesc } from 'lucide-react';
+import { Database, Plus, Power, PowerOff, ListOrdered, SortAsc, SortDesc, RotateCcw } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SourceRow } from './sources/SourceRow';
 import { FilterPanel } from '@/components/shared/FilterPanel';
@@ -13,6 +13,7 @@ import { useSources } from '@/hooks/api/useSources';
 import { useSourceMutations } from '@/hooks/api/useSourceMutations';
 import { DataTable, DataTableColumn } from '@/components/shared/DataTable';
 import { ToggleFilter, ToggleFilterOption } from '@/components/shared/ToggleFilter';
+import { EmptyState } from '@/components/shared/EmptyState';
 
 const COLUMNS: DataTableColumn[] = [
   { header: 'Джерело', className: 'w-1/3' },
@@ -36,13 +37,14 @@ const TYPE_OPTIONS: ToggleFilterOption[] = [
 
 const SORT_OPTIONS: ToggleFilterOption[] = [
   { value: ParserSourceSortField.NAME, label: 'Назва' },
-  { value: ParserSourceSortField.LAST_PARSED_AT, label: 'Парсинг' },
-  { value: ParserSourceSortField.CREATED_AT, label: 'Дата' },
+  { value: ParserSourceSortField.LAST_PARSED_AT, label: 'Був запуск' },
+  { value: ParserSourceSortField.NEXT_RUN_AT, label: 'План запуску' },
+  { value: ParserSourceSortField.CREATED_AT, label: 'Додано' },
 ];
 
 const DIR_OPTIONS: ToggleFilterOption[] = [
-  { value: ParserSortDir.ASC, label: '', icon: SortAsc },
-  { value: ParserSortDir.DESC, label: '', icon: SortDesc },
+  { value: ParserSortDir.ASC, label: 'Asc', icon: SortAsc },
+  { value: ParserSortDir.DESC, label: 'Desc', icon: SortDesc },
 ];
 
 export function SourcesPanel() {
@@ -182,29 +184,26 @@ export function SourcesPanel() {
               }}
             />
 
-            <div className="flex items-end gap-2">
-              <ToggleFilter
-                label="Сортування"
-                icon={ListOrdered}
-                options={SORT_OPTIONS}
-                value={filters.sortBy || ParserSourceSortField.LAST_PARSED_AT}
-                onChange={(val) => {
-                  setFilters({ ...filters, sortBy: val as ParserSourceSortField });
-                  setPage(1);
-                }}
-                className="flex-1"
-              />
-              
-              <ToggleFilter
-                label="Напрямок"
-                options={DIR_OPTIONS}
-                value={filters.sortDir || ParserSortDir.DESC}
-                onChange={(val) => {
-                  setFilters({ ...filters, sortDir: val as ParserSortDir });
-                  setPage(1);
-                }}
-              />
-            </div>
+            <ToggleFilter
+              label="Сортувати за"
+              icon={ListOrdered}
+              options={SORT_OPTIONS}
+              value={filters.sortBy || ParserSourceSortField.LAST_PARSED_AT}
+              onChange={(val) => {
+                setFilters({ ...filters, sortBy: val as ParserSourceSortField });
+                setPage(1);
+              }}
+            />
+            
+            <ToggleFilter
+              label="Напрямок"
+              options={DIR_OPTIONS}
+              value={filters.sortDir || ParserSortDir.DESC}
+              onChange={(val) => {
+                setFilters({ ...filters, sortDir: val as ParserSortDir });
+                setPage(1);
+              }}
+            />
           </FilterPanel>
         )}
 
@@ -221,13 +220,16 @@ export function SourcesPanel() {
         isLoading={isLoading}
         skeletonCount={pageSize}
         emptyState={
-          <div className="flex flex-col items-center gap-3 text-muted-foreground py-12">
-            <FilterX className="h-10 w-10 opacity-20" />
-            <p className="font-medium italic text-lg text-center">Нічого не знайдено за такими фільтрами</p>
-            <Button variant="link" onClick={handleReset} className="text-primary font-bold uppercase text-[10px] tracking-widest">
-              Очистити все
-            </Button>
-          </div>
+          <EmptyState
+            variant="ghost"
+            title="Джерел не знайдено"
+            description="Спробуйте змінити параметри пошуку або скинути фільтри"
+            action={{
+              label: "Скинути фільтри",
+              icon: RotateCcw,
+              onClick: handleReset
+            }}
+          />
         }
         renderRow={(source) => (
           <SourceRow 
