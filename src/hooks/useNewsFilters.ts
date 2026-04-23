@@ -28,7 +28,6 @@ export function useNewsFilters() {
     const params: Record<string, string> = {};
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== '' && value !== null) {
-        // Не додаємо дефолтні значення в URL для чистоти
         if (key === 'page' && value === 1) return;
         if (key === 'pageSize' && value === 12) return;
         if (key === 'minSentiment' && value === -1) return;

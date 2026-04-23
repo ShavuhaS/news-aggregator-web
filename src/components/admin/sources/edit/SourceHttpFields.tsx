@@ -12,7 +12,6 @@ export function SourceHttpFields({ headers, onChange }: SourceHttpFieldsProps) {
   const headerList = Object.entries(safeHeaders);
 
   const addHeader = () => {
-    // Ініціалізуємо новими порожніми рядками, а не undefined
     onChange({ ...safeHeaders, '': '' });
   };
 

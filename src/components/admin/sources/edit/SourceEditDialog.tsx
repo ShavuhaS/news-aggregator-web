@@ -109,26 +109,37 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
 
   const mutation = useMutation({
     mutationFn: async (values: CreateSourceValues) => {
+      const payload: any = { ...values };
+      if (!payload.logoUrl || payload.logoUrl.trim() === '') {
+        delete payload.logoUrl;
+      }
+
       if (!sourceId) {
         return apiFetch('/parser/sources', { 
           method: 'POST', 
-          body: JSON.stringify(values) 
+          body: JSON.stringify(payload) 
         });
       }
 
       const requests = [];
-      // 1. PATCH basic info
+      
+      const basicInfo: any = {
+        name: values.name,
+        url: values.url,
+        schedule: values.schedule,
+      };
+      
+      if (values.logoUrl && values.logoUrl.trim() !== '') {
+        basicInfo.logoUrl = values.logoUrl;
+      } else {
+        basicInfo.logoUrl = null; // Очищуємо лого при оновленні, якщо воно порожнє
+      }
+
       requests.push(apiFetch(`/parser/sources/${sourceId}`, {
         method: 'PATCH',
-        body: JSON.stringify({
-          name: values.name,
-          url: values.url,
-          schedule: values.schedule,
-          logoUrl: values.logoUrl
-        })
+        body: JSON.stringify(basicInfo)
       }));
 
-      // 2. PUT status
       if (values.active !== fullSource?.active) {
         requests.push(apiFetch(`/parser/sources/${sourceId}/status`, {
           method: 'PUT',
@@ -136,7 +147,6 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
         }));
       }
 
-      // 3. PUT config
       requests.push(apiFetch(`/parser/sources/${sourceId}/config`, {
         method: 'PUT',
         body: JSON.stringify({ configuration: values.configuration })
@@ -153,7 +163,6 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
   });
 
   const onSubmit: SubmitHandler<CreateSourceValues> = (values) => {
-    console.log('Submitting values:', values);
     mutation.mutate(values);
   };
 
@@ -216,7 +225,6 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
               </div>
 
               <div className="flex-1 overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-muted">
-                {/* ЗАГАЛЬНЕ */}
                 <TabsContent value="basic" className="m-0 space-y-8 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2.5">
@@ -281,7 +289,6 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
                   </div>
                 </TabsContent>
 
-                {/* КОНФІГУРАЦІЯ */}
                 <TabsContent value="config" className="m-0 space-y-10 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <Controller
                     name="configuration.http.headers"
@@ -358,7 +365,6 @@ export function SourceEditDialog({ sourceId, open, onOpenChange }: SourceEditDia
                   )}
                 </TabsContent>
 
-                {/* РОЗКЛАД */}
                 <TabsContent value="schedule" className="m-0 outline-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="bg-muted/30 p-8 rounded-3xl border border-muted shadow-inner">
                     <Controller

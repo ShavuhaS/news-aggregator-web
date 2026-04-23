@@ -25,13 +25,11 @@ export function SourcesPanel() {
   const [pageSize, setPageSize] = useState(12);
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Стан діалогу
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   
   const [filters, setFilters] = useState<Omit<ListSourcesQuery, 'page' | 'pageSize' | 'search'>>({
-    sortBy: ParserSourceSortField.CREATED_AT,
+    sortBy: ParserSourceSortField.LAST_PARSED_AT,
     sortDir: ParserSortDir.DESC,
   });
   
@@ -54,8 +52,6 @@ export function SourcesPanel() {
       return apiFetch<PaginatedResponse<ParserSource>>(`/parser/sources?${params.toString()}`);
     },
   });
-
-  // Мутації
   const triggerParseMutation = useMutation({
     mutationFn: (id: string) => apiFetch(`/parser/sources/${id}/parse`, { method: 'POST' }),
     onSuccess: () => toast.success('Запит на парсинг надіслано'),
@@ -83,8 +79,7 @@ export function SourcesPanel() {
     },
     onError: (err: Error) => toast.error(err.message),
   });
-
-  // Обробники
+  
   const handleAdd = () => {
     setSelectedSourceId(null);
     setEditDialogOpen(true);
@@ -105,7 +100,7 @@ export function SourcesPanel() {
   const handleReset = () => {
     setSearch('');
     setFilters({
-      sortBy: ParserSourceSortField.CREATED_AT,
+      sortBy: ParserSourceSortField.LAST_PARSED_AT,
       sortDir: ParserSortDir.DESC,
     });
     setPage(1);

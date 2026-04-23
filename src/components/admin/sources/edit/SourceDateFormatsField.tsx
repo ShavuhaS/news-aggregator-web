@@ -8,7 +8,6 @@ interface SourceDateFormatsFieldProps {
 }
 
 export function SourceDateFormatsField({ formats, onChange }: SourceDateFormatsFieldProps) {
-  // Гарантуємо, що завжди працюємо з масивом
   const safeFormats = Array.isArray(formats) ? formats : [];
 
   const addFormat = () => onChange([...safeFormats, '']);
