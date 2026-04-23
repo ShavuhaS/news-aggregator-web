@@ -66,7 +66,7 @@ export function LoginPage() {
             variant="outline" 
             type="button" 
             onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`} 
-            className="w-full font-medium h-11" 
+            className="w-full font-medium h-11 cursor-pointer" 
             disabled={isLoading}
           >
             <GoogleIcon className="mr-2 h-5 w-5" />

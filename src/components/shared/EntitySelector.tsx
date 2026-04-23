@@ -51,12 +51,15 @@ export function EntitySelector({
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: [queryKey, debouncedSearch],
+    queryKey: [queryKey, 'infinite', debouncedSearch],
     queryFn: ({ pageParam = 1 }) =>
       apiFetch<PaginatedResponse<any>>(
         `${searchEndpoint}?search=${encodeURIComponent(debouncedSearch)}&pageSize=10&page=${pageParam}`
       ),
-    getNextPageParam: (lastPage) => (lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || lastPage.page === undefined) return undefined;
+      return lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
+    },
     initialPageParam: 1,
   });
 
@@ -66,7 +69,7 @@ export function EntitySelector({
     ? searchData.pages.flatMap((page) => page.data || []) 
     : [];
     
-  const otherItems = allFoundItems.filter((item) => !preferredIds.has(item.id));
+  const otherItems = allFoundItems.filter((item) => item && !preferredIds.has(item.id));
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'add' | 'remove' }) =>
@@ -96,7 +99,7 @@ export function EntitySelector({
               {item.label}
               <button
                 onClick={() => toggleMutation.mutate({ id: item.id, action: 'remove' })}
-                className="hover:text-destructive transition-colors disabled:opacity-50"
+                className="hover:text-destructive transition-colors disabled:opacity-50 cursor-pointer"
                 disabled={toggleMutation.isPending}
               >
                 <X className="h-3 w-3" />
@@ -112,7 +115,7 @@ export function EntitySelector({
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Додати нові:</p>
             {(isLoading || isFetchingNextPage) && (
-              <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+              <Loader2 className="h-3 w-3 animate-spin text-primary" />
             )}
           </div>
 
@@ -121,7 +124,7 @@ export function EntitySelector({
             <Input
               type="search"
               placeholder={searchPlaceholder}
-              className="pl-9"
+              className="pl-9 h-10"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

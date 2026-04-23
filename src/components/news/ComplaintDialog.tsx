@@ -67,10 +67,10 @@ export function ComplaintDialog({ newsId, newsTitle, open, onOpenChange }: Compl
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4 items-center">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="sm:flex-1 hover:bg-accent transition-colors">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="sm:flex-1 hover:bg-accent transition-colors cursor-pointer">
               Скасувати
             </Button>
-            <Button onClick={() => navigate('/login')} className="sm:flex-1 hover:opacity-90 transition-opacity">
+            <Button onClick={() => navigate('/login')} className="sm:flex-1 hover:opacity-90 transition-opacity cursor-pointer">
               Увійти
             </Button>
           </DialogFooter>
@@ -119,7 +119,7 @@ export function ComplaintDialog({ newsId, newsTitle, open, onOpenChange }: Compl
               variant="ghost" 
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
-              className="font-bold uppercase text-[10px] tracking-widest hover:bg-muted/50 hover:text-foreground transition-all"
+              className="font-bold uppercase text-[10px] tracking-widest hover:bg-muted/50 hover:text-foreground transition-all cursor-pointer"
             >
               Скасувати
             </Button>
