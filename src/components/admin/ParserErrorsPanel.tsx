@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Database, AlertCircle, RotateCcw } from 'lucide-react';
 import { Pagination } from '@/components/shared/Pagination';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { ComboboxFilter } from '@/components/shared/ComboboxFilter';
 import { DataTable, DataTableColumn } from '@/components/shared/DataTable';
 import { EmptyState } from '@/components/shared/EmptyState';

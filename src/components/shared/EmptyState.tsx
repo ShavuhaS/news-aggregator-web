@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { LucideIcon, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
