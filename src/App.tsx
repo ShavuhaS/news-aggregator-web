@@ -10,6 +10,7 @@ import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { NewsFeedPage } from '@/pages/NewsFeedPage';
 import { ForYouPage } from '@/pages/news/ForYouPage';
 import { NearbyNewsPage } from '@/pages/news/NearbyNewsPage';
+import { AdminPage } from '@/pages/admin/AdminPage';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Loader2 } from 'lucide-react';
@@ -52,7 +53,7 @@ function App() {
 
                 <Route path="/for-you" element={<ProtectedRoute><ForYouPage /></ProtectedRoute>} />
                 <Route path="/profile/:tab?" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute requiredRole="ADMIN"><AdminDashboardPage /></ProtectedRoute>} />
+                <Route path="/admin" element={<ProtectedRoute requiredRole="ADMIN"><AdminPage /></ProtectedRoute>} />
               </Routes>
             </main>
             
@@ -63,7 +64,5 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-const AdminDashboardPage = () => <div className="text-center py-20 text-muted-foreground">Панель адміністратора.</div>;
 
 export default App;
