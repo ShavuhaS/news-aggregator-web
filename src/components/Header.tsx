@@ -4,8 +4,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { label: 'Новини', href: '/' },
   { label: 'Для вас', href: '/for-you', protected: true },
+  { label: 'Пошук', href: '/' },
   { label: 'Адмін', href: '/admin', protected: true, roles: ['ADMIN'] },
 ];
 

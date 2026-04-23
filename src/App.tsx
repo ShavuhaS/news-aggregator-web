@@ -8,6 +8,7 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { NewsFeedPage } from '@/pages/NewsFeedPage';
+import { ForYouPage } from '@/pages/news/ForYouPage';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
@@ -51,7 +52,6 @@ function App() {
   );
 }
 
-const ForYouPage = () => <div className="text-center py-20 text-muted-foreground">Персоналізовані новини.</div>;
 const AdminDashboardPage = () => <div className="text-center py-20 text-muted-foreground">Панель адміністратора.</div>;
 
 export default App;
