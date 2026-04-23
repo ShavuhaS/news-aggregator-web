@@ -46,11 +46,19 @@ export function ComplaintDialog({ newsId, newsTitle, open, onOpenChange }: Compl
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason.trim()) {
+    const trimmedReason = reason.trim();
+    
+    if (!trimmedReason) {
       toast.error('Будь ласка, вкажіть причину скарги');
       return;
     }
-    mutation.mutate(reason);
+    
+    if (trimmedReason.length < 10) {
+      toast.error('Причина скарги має бути не менше 10 символів');
+      return;
+    }
+
+    mutation.mutate(trimmedReason);
   };
 
   if (!isAuthenticated && open) {
@@ -94,15 +102,20 @@ export function ComplaintDialog({ newsId, newsTitle, open, onOpenChange }: Compl
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-1">
           <div className="space-y-6">
-            <label 
-              htmlFor="reason" 
-              className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground pl-1.5"
-            >
-              Опишіть проблему:
-            </label>
+            <div className="flex justify-between items-center px-1.5">
+              <label 
+                htmlFor="reason" 
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground"
+              >
+                Опишіть проблему:
+              </label>
+              <span className={`text-[9px] font-black ${reason.length < 10 ? 'text-destructive' : 'text-emerald-500'}`}>
+                {reason.length} / 10+
+              </span>
+            </div>
             <Textarea
               id="reason"
-              placeholder="Чому ця новина здається вам підозрілою або некоректною?"
+              placeholder="Чому ця новина здається вам підозрілою або некоректною? (мінімум 10 символів)"
               className="min-h-[140px] resize-none focus-visible:ring-destructive/20 border-muted bg-muted/10 p-4 text-sm leading-relaxed"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -126,8 +139,8 @@ export function ComplaintDialog({ newsId, newsTitle, open, onOpenChange }: Compl
             <Button 
               type="submit" 
               variant="destructive" 
-              disabled={mutation.isPending}
-              className="font-black uppercase text-[10px] tracking-widest px-8 h-10 shadow-lg shadow-destructive/10 hover:shadow-destructive/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              disabled={mutation.isPending || reason.trim().length < 10}
+              className="font-black uppercase text-[10px] tracking-widest px-8 h-10 shadow-lg shadow-destructive/10 hover:shadow-destructive/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 disabled:grayscale disabled:scale-100"
             >
               {mutation.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin mr-2" />

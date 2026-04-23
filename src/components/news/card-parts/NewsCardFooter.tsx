@@ -1,18 +1,26 @@
-import { ExternalLink, MessageSquareWarning, Settings } from 'lucide-react';
+import { ExternalLink, MessageSquareWarning, Settings, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getSentimentDetails } from '@/lib/sentiment';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface NewsCardFooterProps {
   sentimentScore: number | null;
   link: string;
   onComplaintClick: () => void;
   variant?: 'default' | 'compact';
+  complaintsCount?: number;
 }
 
-export function NewsCardFooter({ sentimentScore, link, onComplaintClick, variant = 'default' }: NewsCardFooterProps) {
+export function NewsCardFooter({ 
+  sentimentScore, 
+  link, 
+  onComplaintClick, 
+  variant = 'default',
+  complaintsCount 
+}: NewsCardFooterProps) {
   const { user } = useAuthStore();
   const { color, icon: EmotionIcon, label } = getSentimentDetails(sentimentScore);
   const percentage = Math.round(Math.abs(sentimentScore ?? 0) * 100);
@@ -62,20 +70,28 @@ export function NewsCardFooter({ sentimentScore, link, onComplaintClick, variant
             <MessageSquareWarning className={cn("h-4 w-4", isCompact && "h-3.5 w-3.5")} />
           )}
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className={cn(
-            "h-9 px-4 gap-2 text-xs font-bold shadow-sm shrink-0",
-            isCompact && "h-8 px-3 gap-1.5 text-[10px]"
-          )} 
-          asChild
-        >
-          <a href={link} target="_blank" rel="noopener noreferrer">
-            <span className={cn(isCompact && "hidden xs:inline")}>Читати</span>
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        </Button>
+
+        {complaintsCount !== undefined ? (
+          <Badge variant="destructive" className="h-8 px-3 gap-1.5 rounded-lg border-2 border-background shadow-sm animate-in zoom-in duration-300 shrink-0">
+            <AlertTriangle className="h-3 w-3" />
+            <span className="text-[10px] font-black uppercase tracking-wider">{complaintsCount}</span>
+          </Badge>
+        ) : (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className={cn(
+              "h-9 px-4 gap-2 text-xs font-bold shadow-sm shrink-0",
+              isCompact && "h-8 px-3 gap-1.5 text-[10px]"
+            )} 
+            asChild
+          >
+            <a href={link} target="_blank" rel="noopener noreferrer">
+              <span className={cn(isCompact && "hidden xs:inline")}>Читати</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </Button>
+        )}
       </div>
     </div>
   );

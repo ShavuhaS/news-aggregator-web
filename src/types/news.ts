@@ -58,6 +58,10 @@ export interface NewsArticleDetails extends NewsArticle {
   locations: Location[];
 }
 
+export interface NewsWithComplaintsCount extends NewsArticle {
+  complaintsCount: number;
+}
+
 export interface ListNewsQuery {
   page?: number;
   pageSize?: number;

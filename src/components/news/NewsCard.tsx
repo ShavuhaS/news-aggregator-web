@@ -13,9 +13,10 @@ import { NewsEditDialog } from '@/components/admin/NewsEditDialog';
 interface NewsCardProps {
   article: NewsArticle;
   variant?: 'default' | 'compact';
+  complaintsCount?: number;
 }
 
-export function NewsCard({ article, variant = 'default' }: NewsCardProps) {
+export function NewsCard({ article, variant = 'default', complaintsCount }: NewsCardProps) {
   const { user } = useAuthStore();
   const { color } = getSentimentDetails(article.sentimentScore);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -53,6 +54,7 @@ export function NewsCard({ article, variant = 'default' }: NewsCardProps) {
             link={article.link} 
             onComplaintClick={() => setIsActionDialogOpen(true)}
             variant={variant}
+            complaintsCount={complaintsCount}
           />
         </div>
       </Card>

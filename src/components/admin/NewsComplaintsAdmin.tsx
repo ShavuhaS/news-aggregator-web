@@ -13,9 +13,10 @@ import { uk } from 'date-fns/locale';
 interface NewsComplaintsAdminProps {
   newsId: string;
   onNewsDeleted: () => void;
+  onUpdate?: () => void;
 }
 
-export function NewsComplaintsAdmin({ newsId, onNewsDeleted }: NewsComplaintsAdminProps) {
+export function NewsComplaintsAdmin({ newsId, onNewsDeleted, onUpdate }: NewsComplaintsAdminProps) {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
@@ -30,7 +31,9 @@ export function NewsComplaintsAdmin({ newsId, onNewsDeleted }: NewsComplaintsAdm
     onSuccess: () => {
       toast.success('Новину видалено, скарги вирішено');
       queryClient.invalidateQueries({ queryKey: ['news'] });
+      queryClient.invalidateQueries({ queryKey: ['news-complaints-admin'] });
       onNewsDeleted();
+      onUpdate?.();
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -39,7 +42,9 @@ export function NewsComplaintsAdmin({ newsId, onNewsDeleted }: NewsComplaintsAdm
     mutationFn: () => apiFetch(`/news/${newsId}/complaints/reject`, { method: 'POST' }),
     onSuccess: () => {
       toast.success('Всі скарги відхилено');
+      queryClient.invalidateQueries({ queryKey: ['news-complaints-admin'] });
       refetch();
+      onUpdate?.();
     },
     onError: (err: Error) => toast.error(err.message),
   });

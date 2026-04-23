@@ -72,7 +72,7 @@ export function ForYouPage() {
                     icon={Tag}
                     queryParam="categoryId"
                     queryValue={cat.id}
-                    href={`/?categoryId=${cat.id}`}
+                    href={`/search?categoryId=${cat.id}`}
                   />
                 ))}
               </NewsSectionGroup>
@@ -88,7 +88,7 @@ export function ForYouPage() {
                     icon={MapPin}
                     queryParam="locationId"
                     queryValue={loc.id}
-                    href={`/?locationId=${loc.id}`}
+                    href={`/search?locationId=${loc.id}`}
                   />
                 ))}
               </NewsSectionGroup>
