@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ListNewsQuery, NewsSortField, SortOrder } from '@/types/news';
+import { useDebounce } from './useDebounce';
 
 export function useNewsFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,6 +24,8 @@ export function useNewsFilters() {
 
   const [filters, setFilters] = useState<ListNewsQuery>(getInitialFilters());
   const [searchInput, setSearchInput] = useState(filters.search || '');
+  
+  const debouncedSearch = useDebounce(searchInput, 500);
 
   useEffect(() => {
     const params: Record<string, string> = {};
@@ -40,13 +43,10 @@ export function useNewsFilters() {
   }, [filters, setSearchParams]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchInput !== filters.search) {
-        setFilters(prev => ({ ...prev, search: searchInput, page: 1 }));
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput, filters.search]);
+    if (debouncedSearch !== filters.search) {
+      setFilters(prev => ({ ...prev, search: debouncedSearch, page: 1 }));
+    }
+  }, [debouncedSearch, filters.search]);
 
   const handlePageChange = (newPage: number) => {
     setFilters(prev => ({ ...prev, page: newPage }));

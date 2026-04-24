@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/popover';
 import { PaginatedResponse } from '@/types/api';
 import { cn } from '@/lib/utils';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface ComboboxFilterProps {
   value?: string;
@@ -50,10 +51,11 @@ export function ComboboxFilter({
 }: ComboboxFilterProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 500);
 
   const { data } = useQuery({
-    queryKey: [queryKey, search],
-    queryFn: () => apiFetch<PaginatedResponse<any>>(`${searchEndpoint}?search=${search}&pageSize=50`),
+    queryKey: [queryKey, debouncedSearch],
+    queryFn: () => apiFetch<PaginatedResponse<any>>(`${searchEndpoint}?search=${encodeURIComponent(debouncedSearch)}&pageSize=50`),
   });
 
   const items = data?.data || [];

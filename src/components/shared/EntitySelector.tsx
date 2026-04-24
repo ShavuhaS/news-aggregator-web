@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { X, Loader2, Search } from 'lucide-react';
 import { PaginatedResponse } from '@/types/api';
 import { EntityList } from './EntityList';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface EntitySelectorProps {
   title: string;
@@ -41,12 +42,7 @@ export function EntitySelector({
   useBodyForAdd = false,
 }: EntitySelectorProps) {
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 500);
-    return () => clearTimeout(timer);
-  }, [search]);
+  const debouncedSearch = useDebounce(search, 500);
 
   const {
     data: searchData,
